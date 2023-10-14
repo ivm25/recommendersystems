@@ -22,28 +22,47 @@ mean_duration = data['duration_ms'].mean()
 mean_valence = data['valence'].mean()
 mean_speechiness = data['speechiness'].mean()
 
-def mood_classification(df):
+def moods(df):
     df = data
     df['energetic'] = np.where(
                               (df['danceability'] > mean_danceability)
-                               & (df['energy'] >  mean_energy),'energetic','')
+                               & (df['energy'] >  mean_energy),'1','')
     df['calm'] = np.where(
                          (df['instrumentalness'] > median_instrumentalness) 
-                         & (df['duration_ms'] >  mean_duration),'calm','')
+                         & (df['duration_ms'] >  mean_duration),'2','')
     df['happy'] = np.where(
                          (df['valence'] > mean_valence) 
-                         & (df['energy'] >  mean_energy),'happy','')
+                         & (df['energy'] >  mean_energy),'3','')
     df['sad'] = np.where(
                          (df['valence'] < mean_valence) 
-                         | (df['energy'] <  mean_energy),'sad','')
+                         | (df['energy'] <  mean_energy),'4','')
     df['live'] = np.where(
                          (df['liveness'] > mean_liveness) 
-                         ,'live','')
+                         ,'5','')
     df['speechy'] = np.where(
                          (df['speechiness'] > mean_liveness) 
-                         ,'speechy','')
+                         ,'6','')
     
     return df
 
-mood_data = mood_classification(data)
+mood_data = moods(data)
+
+def mood_classification(df):
+    df = mood_data
+    mood_data_melted = pd.melt(df,
+                               id_vars = ['song_name',
+                                            'genre'],
+                               value_vars=['energetic',
+                                            'happy',
+                                            'sad',
+                                            'calm',
+                                            'live',
+                                            'speechy'],
+                               var_name='moods'
+                                      )
+    return mood_data_melted
+
+moods_of_songs = mood_classification(mood_data)
+# mood_data['mood'] = mood_data.apply(lambda x:mood_classification(mood_data), axis =1)
+mood_data
 
