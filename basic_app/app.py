@@ -1,11 +1,17 @@
 from shiny import App, render, ui, reactive, Session
 from matplotlib import pyplot as plt
-from data_wrangling.data_wrangling import collect_data
+from data_wrangling.data_wrangling import collect_data, mood_classification
 import seaborn as sns
 from pathlib import Path
 
+www_dir = Path(__file__).parent / "www"
+
 # style
-sns.set_style('darkgrid')
+sns.set_style('dark')
+page_dependencies = ui.tags.head(
+    ui.tags.link(rel="stylesheet", type="text/css", href="style.css")
+)
+
 # data vars
 
 genre = collect_data()
@@ -18,57 +24,78 @@ app_ui = ui.page_navbar(
                                       ui.input_selectize(
                                         "Genre_Selection", 
                                         "Select a Genre",
-                                        ['Rock', 'Pop'],
+                                        genre['genre'].unique().tolist(),
                                         selected='Pop',
+                                        multiple=False
+                                    ), ui.input_selectize(
+                                        "Song_Selection", 
+                                        "Select a Song",
+                                        genre['song_name'].unique().tolist(),
+                                        selected= 'Pathology',
                                         multiple=False
                                     )
                                   
                                   ),
                                   main = ui.panel_main(
-                                      ui.navset_pill_card(
-                                          ui.nav("Distributions"
+                                      ui.navset_pill(
+                                          ui.nav("Distributions",
                                                 
-                                                 ),
+                                                
+                                                 ),ui.nav("Song Categories")
                                         
-                                      ),ui.row(ui.output_plot("test_plot",width='50%'),
-                                               ui.output_plot("plot_2", width = '50%'))
+                                      ),ui.row(ui.output_plot("plot_1",width='50%'),
+                                               ui.output_plot("plot_2", width = '50%')),
+                                       ui.row(ui.output_plot("plot_3",width='50%'),
+                                               ui.output_plot("plot_4", width = '50%'))
                                   )
                               ),
                        ),
                        title=ui.tags.div(
-                           ui.img(src = "ishan_logo.png"),
+                           ui.img(src = "ishan_logo.jpg",height="50px", style="margin:5px;" ),
                            ui.h1( "Music Features Analyser")
-                       ),bg="#0062cc"
+                       ),bg="#0062cc",
+                       header = page_dependencies
                        
     
 )
 
-# app_ui = ui.page_fluid(
-#     ui.h2("Hello world of Rec Systems"),
-#     ui.input_slider("n", "N", 0, 140, 20),
-#     ui.output_text("txt"),
-#     ui.output_plot("test_plot"),
-# )
 
 
 def server(input, output, session:Session):
-    # @output
-    # @render.text
-    # def txt():
-    #     return f"n*2 is {input.n() * 2}"
+    
     @output
     @render.plot
-    def test_plot():
-        return sns.histplot(genre['instrumentalness'],
-                            kde=True,
+    def plot_1():
+        return sns.displot(genre, 
+                           y = genre['danceability'][genre['genre'] == input.Genre_Selection()],
+                           
+                           kde = True,
+                           
                             )
     @output
     @render.plot
     def plot_2():
-        return sns.histplot(genre['energy'],
+        return sns.histplot(genre, 
+                            y =genre['energy'][genre['genre'] == input.Genre_Selection()],
+                            kde=True,
+                            )
+                
+
+    @output
+    @render.plot
+    def plot_3():
+        return sns.histplot(genre,
+                            y =genre['valence'][genre['genre'] == input.Genre_Selection()],
+                           kde = True
+                            )
+    @output
+    @render.plot
+    def plot_4():
+        return sns.histplot(genre,
+                            y = genre['duration_ms'][genre['genre'] == input.Genre_Selection()],
                             kde=True,
                             )
 
-
-www_dir = Path(__file__).parent / "www"
+parent_path = str(Path().absolute()) + '/basic_app/www'
+www_dir = Path(__file__).parent /"www"
 app = App(app_ui, server, static_assets=www_dir)
