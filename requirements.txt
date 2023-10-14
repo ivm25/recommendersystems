@@ -85,3 +85,4 @@ websockets==10.4
 widgetsnbextension==4.0.5
 yfinance==0.2.4
 zipp==3.11.0
+gunicorn
