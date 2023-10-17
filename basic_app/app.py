@@ -41,7 +41,8 @@ app_ui = ui.page_navbar(
                                           ui.nav("Distributions",
                                                 
                                                 
-                                                 ),ui.nav("Song Categories")
+                                                 ),ui.nav("Song Categories",
+                                                          )
                                         
                                       ),ui.row(ui.output_plot("plot_1",width='50%'),
                                                ui.output_plot("plot_2", width = '50%')),

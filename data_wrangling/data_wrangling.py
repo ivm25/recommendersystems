@@ -63,6 +63,5 @@ def mood_classification(df):
     return mood_data_melted
 
 moods_of_songs = mood_classification(mood_data)
-# mood_data['mood'] = mood_data.apply(lambda x:mood_classification(mood_data), axis =1)
-mood_data
 
+moods_of_songs
