@@ -83,10 +83,8 @@ wcwidth
 webencodings
 websockets
 widgetsnbextension
-# pytz == 2022.7
+
 zipp
 gunicorn
 rsconnect-python
 
-pypiwin32
-pywin32==306
