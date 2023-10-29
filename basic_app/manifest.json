@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "locale": "English_Australia.1252",
+  "metadata": {
+    "appmode": "python-shiny",
+    "entrypoint": "app"
+  },
+  "python": {
+    "version": "3.9.5",
+    "package_manager": {
+      "name": "pip",
+      "version": "23.3",
+      "package_file": "requirements.txt"
+    }
+  },
+  "files": {
+    "requirements.txt": {
+      "checksum": "398c5ba0541c604d639602c870c7ac61"
+    },
+    "app.py": {
+      "checksum": "652fbed3103a860a2e42be2976ed168c"
+    },
+    "www/ishan_logo.jpg": {
+      "checksum": "7ce7a76375aa5b3258e105aebe9eb83b"
+    },
+    "www/style.css": {
+      "checksum": "798126857f9449429853894d6438a51e"
+    }
+  }
+}

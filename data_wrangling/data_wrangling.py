@@ -3,15 +3,20 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+
+
+
 def collect_data():
-    genre_data = pd.read_csv('data/genres_v2.csv')
+    """_summary_
+
+    Returns:
+        _type_: _description_
+    """
+    genre_data = pd.read_csv('data/dataset.csv')
     return genre_data
 
 data = collect_data()
-
-data.info()
-
-data['song_name'].unique()
+    
 #feature engineering
 
 mean_energy = data['energy'].mean()
@@ -22,46 +27,40 @@ mean_duration = data['duration_ms'].mean()
 mean_valence = data['valence'].mean()
 mean_speechiness = data['speechiness'].mean()
 
-def moods(df):
-    df = data
-    df['energetic'] = np.where(
-                              (df['danceability'] > mean_danceability)
-                               & (df['energy'] >  mean_energy),'1','')
-    df['calm'] = np.where(
-                         (df['instrumentalness'] > median_instrumentalness) 
-                         & (df['duration_ms'] >  mean_duration),'2','')
-    df['happy'] = np.where(
-                         (df['valence'] > mean_valence) 
-                         & (df['energy'] >  mean_energy),'3','')
-    df['sad'] = np.where(
-                         (df['valence'] < mean_valence) 
-                         | (df['energy'] <  mean_energy),'4','')
-    df['live'] = np.where(
-                         (df['liveness'] > mean_liveness) 
-                         ,'5','')
-    df['speechy'] = np.where(
-                         (df['speechiness'] > mean_liveness) 
-                         ,'6','')
-    
-    return df
 
-mood_data = moods(data)
+
 
 def mood_classification(df):
-    df = mood_data
-    mood_data_melted = pd.melt(df,
-                               id_vars = ['song_name',
-                                            'genre'],
-                               value_vars=['energetic',
-                                            'happy',
-                                            'sad',
-                                            'calm',
-                                            'live',
-                                            'speechy'],
-                               var_name='moods'
-                                      )
-    return mood_data_melted
+    """_summary_
 
-moods_of_songs = mood_classification(mood_data)
+    Args:
+        df (_type_): _description_
 
-moods_of_songs
+    Returns:
+        _type_: _description_
+    """
+    
+    if (df['energy'] > mean_energy) & (df['danceability'] > mean_danceability):
+        return 'energetic'
+    elif (df['instrumentalness'] > median_instrumentalness) &  (df['duration_ms'] >  mean_duration):
+        return 'calm'
+    elif (df['valence'] > mean_valence) & (df['energy'] >  mean_energy):
+        return 'happy'
+    elif (df['liveness'] > mean_liveness):
+        return 'live'
+    elif (df['speechiness'] > mean_speechiness):
+        return 'speechy'
+    else:
+        return 'sad'
+    
+
+    
+
+
+if __name__ == "__main__":
+    
+    mood_classified = data.copy()
+    
+    mood_classified['mood'] = mood_classified.apply(mood_classification, axis = 1)
+    
+  

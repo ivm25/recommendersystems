@@ -1,0 +1,12 @@
+{
+    "https://api.shinyapps.io": {
+        "server_url": "https://api.shinyapps.io",
+        "filename": "C:\\Users\\ishan\\OneDrive\\Documents\\recommendersystems",
+        "app_url": "https://ishanvm.shinyapps.io/music_5/",
+        "app_id": 10241920,
+        "app_guid": null,
+        "title": "music_analyser",
+        "app_mode": "python-shiny",
+        "app_store_version": 1
+    }
+}

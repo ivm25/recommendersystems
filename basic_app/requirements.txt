@@ -87,4 +87,3 @@ widgetsnbextension
 zipp
 gunicorn
 rsconnect-python
-data_wrangling.data_wrangling
