@@ -62,8 +62,9 @@ app_ui = ui.page_fluid(ui.page_navbar(
                                         selected='happy',
                                         multiple=False
                                   
-                                  )),
-                                  main = ui.panel_main(
+                                  ))),
+                                  
+                                   ui.panel_main(
                                       ui.navset_pill(
                                           ui.nav("Key Music Features",
                                                 ui.row(ui.output_plot("plot_1",width='100%'))
@@ -73,9 +74,9 @@ app_ui = ui.page_fluid(ui.page_navbar(
                                                           )
                                         
                                       ),
-                                    #   ui.row(ui.output_plot("plot_1",width='100%')),
+                                  
                                     
-                                  )
+                                  
                               ),
                        ),
                        title=ui.tags.div(
