@@ -4,6 +4,7 @@ from data_wrangling.data_wrangling import collect_data, mood_classification
 import seaborn as sns
 from pathlib import Path
 import plotly.express as px
+import numpy as np
 
 
 # style
@@ -38,16 +39,21 @@ mood_classified = genre.copy()
 mood_classified['mood'] = mood_classified.apply(mood_classification, axis = 1)
 
 grouped_by_mood = mood_classified\
-                    .groupby(['track_genre','mood','track_name'])\
+                    .groupby(['track_genre','mood','track_name','artists'])\
                         .mean('popularity')\
                             .reset_index()\
                                 .sort_values(by='popularity', 
                                             ascending =  False) 
 
+
+colours = np.where(grouped_by_mood['popularity'] > 95, 'green','red')
+my_cmap = plt.get_cmap("plasma")
+
+
 app_ui = ui.page_fluid(ui.page_navbar(
                        ui.nav(" ",
                               ui.layout_sidebar(
-                                  sidebar = ui.panel_sidebar(
+                                  ui.panel_sidebar(
                                       ui.h2("Let's Analyse Music"),
                                       ui.input_selectize(
                                         "Genre_Selection", 
@@ -62,14 +68,14 @@ app_ui = ui.page_fluid(ui.page_navbar(
                                         selected='happy',
                                         multiple=False
                                   
-                                  ))),
+                                  )),
                                   
                                    ui.panel_main(
-                                      ui.navset_pill(
+                                      ui.navset_card_tab(
                                           ui.nav("Key Music Features",
                                                 ui.row(ui.output_plot("plot_1",width='100%'))
                                                 
-                                                 ),ui.nav("Top Songs",
+                                                 ),ui.nav("Top songs and artists",
                                                          ui.row(ui.output_plot("plot_2", width = '100%'))
                                                           )
                                         
@@ -78,7 +84,7 @@ app_ui = ui.page_fluid(ui.page_navbar(
                                     
                                   
                               ),
-                       ),
+                       )),
                        title=ui.tags.div(
                            ui.img(src = "ishan_logo.jpg",height="50px", style="margin:5px;" ),
                            ui.h1( "Music Features Analyser")
@@ -95,20 +101,34 @@ def server(input, output, session:Session):
     @output
     @render.plot
     def plot_2():
-        # fig = px.bar(grouped_by_mood,
-        #              x = grouped_by_mood['popularity'].iloc[0:15],
-        #              y = grouped_by_mood['track_name'][grouped_by_mood['mood'] == input.Mood_Selection()].iloc[0:15],
-        #              color = 'track_genre')
+    #     return px.bar(grouped_by_mood,
+    #                  y = grouped_by_mood['popularity'].iloc[0:15],
+    #                  x = grouped_by_mood['track_name'].iloc[0:15],
+    #                )
         
-        fig, axs = plt.subplots(figsize = (36,24))
-        axs.barh(y = grouped_by_mood['track_name'][grouped_by_mood['mood'] == input.Mood_Selection()].iloc[0:15],
-                 width = grouped_by_mood['popularity'].iloc[0:15],
-                 color = "#0062cc",
-                 
+        fig, axs = plt.subplots(1,2, figsize = (36,24), sharex = True)
+        axs[0].barh(y = grouped_by_mood['track_name'][grouped_by_mood['mood'] == input.Mood_Selection()].iloc[0:25],
+                 width = sorted(grouped_by_mood['popularity'].iloc[0:25]),
+                 color = my_cmap.colors,
+                 alpha = 0.6
                  )
         
+        axs[0].title.set_text("Most Popular Tracks")
+        axs[0].set_xlabel("Popularity")
+        axs[0].set_ylabel("Songs")
+        # axs[0].legend(loc = "lower left")
+
+        axs[1].barh(y = grouped_by_mood['artists'][grouped_by_mood['mood'] == input.Mood_Selection()].iloc[0:25],
+                 width = sorted(grouped_by_mood['popularity'].iloc[0:25]),
+                 color = my_cmap.colors,
+                 alpha = 0.6
+                 )
+        
+        axs[1].title.set_text("Most Popular Artists")
+        axs[1].set_xlabel("Popularity")
+        axs[1].set_ylabel("Artists")
        
-       
+        plt.tight_layout()
     
     
     @output
