@@ -87,4 +87,4 @@ widgetsnbextension
 zipp
 gunicorn
 rsconnect-python
-
+shinyswatch
