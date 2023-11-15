@@ -88,3 +88,5 @@ zipp
 gunicorn
 rsconnect-python
 shinyswatch
+
+scikit-learn
