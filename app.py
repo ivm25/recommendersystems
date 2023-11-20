@@ -1,7 +1,7 @@
 from shiny import App, render, ui, reactive, Session
 from matplotlib import pyplot as plt
 import shinyswatch
-from data_wrangling.data_wrangling import collect_data, mood_classification
+from data_wrangling.data_wrangling import collect_data, mood_classification, correlation
 import seaborn as sns
 from pathlib import Path
 import plotly.express as px
@@ -47,6 +47,8 @@ grouped_by_mood = mood_classified\
                                             ascending =  False) 
 
 
+correlation_data = correlation(genre)
+
 colours = np.where(grouped_by_mood['popularity'] > 95, 'green','red')
 my_cmap = plt.get_cmap("Dark2")
 
@@ -85,6 +87,15 @@ app_ui = ui.page_fluid(ui.page_navbar(
                                                           ), width = 2),
                                                                 ui.output_plot("plot_2", width = '100%'),
                                                                 width = 2
+                                                          )),
+                                                    ui.nav("Correlation Analysis",
+                                                         ui.layout_sidebar(ui.panel_sidebar(
+                                                           ui.p("""Looking at the Pearson Correlation Coefficient.
+                                                            A positive Coefficient dhows a linear relationship between the variables
+                                                                and vice versa.
+                                                        """),width = 2),
+                                                                ui.output_plot("plot_3", width = '100%'),
+                                                                width = 2
                                                           ))
                                         
                                       ),
@@ -109,11 +120,7 @@ def server(input, output, session:Session):
     @output
     @render.plot
     def plot_2():
-    #     return px.bar(grouped_by_mood,
-    #                  y = grouped_by_mood['popularity'].iloc[0:15],
-    #                  x = grouped_by_mood['track_name'].iloc[0:15],
-    #                )
-        
+    
         fig, axs = plt.subplots(1,2, figsize = (24,24), sharex = True)
         axs[0].barh(y = grouped_by_mood['track_name'][grouped_by_mood['mood'] == input.Mood_Selection()].iloc[0:15],
                  width = sorted(grouped_by_mood['popularity'].iloc[0:15]),
@@ -225,7 +232,14 @@ def server(input, output, session:Session):
         fig.suptitle("Distributions of key music features", fontsize = 12)
         
     
-
+    @output
+    @render.plot
+    def plot_3():
+    
+        heatmap = sns.heatmap(correlation_data, 
+                              annot=True, 
+                              cmap="Greens",
+                                fmt='.1g')
 
 www_dir = Path(__file__).parent /"www"
 app = App(app_ui, server,static_assets=www_dir)

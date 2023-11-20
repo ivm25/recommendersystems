@@ -54,7 +54,22 @@ def mood_classification(df):
         return 'sad'
     
 
+def correlation(df):
+    required_cols = [
+                    'danceability',
+                    'energy',
+                    "valence",
+                    "speechiness",
+                    "instrumentalness",
+                    "acousticness",
+                    "liveness",
+                    "loudness",
+                    "speechiness",
+                    "popularity"]
     
+    correlation_data = df[required_cols].corr()
+
+    return correlation_data
 
 
 if __name__ == "__main__":
