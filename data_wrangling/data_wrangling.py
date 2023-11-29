@@ -17,6 +17,20 @@ def collect_data():
 
 data = collect_data()
     
+
+def data_manipulation():
+    """_summary_
+
+    Returns:
+        _type_: _description_
+    """
+    data = collect_data()
+    data.drop_duplicates('track_name', 
+                                 inplace = True)
+
+    data.dropna(inplace = True)
+    return data
+    
 #feature engineering
 
 mean_energy = data['energy'].mean()
@@ -46,10 +60,6 @@ def mood_classification(df):
         return 'calm'
     elif (df['valence'] > mean_valence) & (df['energy'] >  mean_energy):
         return 'happy'
-    elif (df['liveness'] > mean_liveness):
-        return 'live'
-    elif (df['speechiness'] > mean_speechiness):
-        return 'speechy'
     else:
         return 'sad'
     
