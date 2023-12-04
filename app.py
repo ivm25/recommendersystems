@@ -68,7 +68,7 @@ app_ui = ui.page_fluid(ui.page_navbar(
                                                                 "Genre_Selection", 
                                                                 "Select a Genre",
                                                                 analysis_data['track_genre'].unique().tolist(),
-                                                                selected='rock',
+                                                                selected='pop',
                                                                
                                                                 # multiple=False
                                                 ), ui.p("""Each Genre is a combination of key music features.
@@ -86,7 +86,7 @@ app_ui = ui.page_fluid(ui.page_navbar(
                                                                 "Genre_Selection_2", 
                                                                 "Select a Genre",
                                                                 grouped_by_mood['track_genre'].unique().tolist(),
-                                                                selected='rock',
+                                                                selected='pop',
                                                                 # multiple=False
                                   
                                                           ), width = 2),
@@ -106,15 +106,18 @@ app_ui = ui.page_fluid(ui.page_navbar(
                                                                 width = 2
                                                           )),
                                                            ui.nav("Recommender System",
-                                                         ui.layout_sidebar(ui.panel_sidebar(ui.input_text(
+                                                         ui.layout_sidebar(ui.panel_sidebar(ui.input_select(
                                                                 "song_recommender", 
-                                                                "Song Input",
-                                                                value = 'Hero',
-                                                                placeholder = "Type a Song",
+                                                                "Recommend Songs for",
+                                                                grouped_by_mood['track_name'].iloc[0:300].unique().tolist(),
+                                                                selected = 'Die For You',
+                                                                # placeholder = "Type a Song",
                                                                 
                                   
                                                           ), width = 2),
-                                                                ui.output_table("recommendations", width = '100%'),
+                                                                ui.row(ui.output_text("headline"),
+                                                                       ui.output_table("recommendations", width = '100%'),
+                                                                       ),
                                                                 width = 2
                                                           ))
                                         
@@ -296,13 +299,32 @@ def server(input, output, session:Session):
         
         top_recs = top_recs.style\
                    .set_properties(**{                                                  
-                                    # 'color': '#0B9C31',                       
+                                    'background-color': 'black',                       
                                     'border-color': 'white',
                                     'hide-index': True,
-                                    'header-color': 'black'})
-                                    
+                                    'header-color': 'black'})\
+                                    .background_gradient(cmap = my_cmap.colors)\
+                                    .hide(axis = 'index')
+        
+        cell_hover = {  # for row hover use <tr> instead of <td>
+            'selector': 'td:hover',
+            'props': [('background-color', '#0B9C31')]
+        }
+        
+        headers = {
+            'selector': 'th:not(.index_name)',
+            'props': 'background-color: #000000; font-weight:normal;color: white;'
+        }
+
+        top_recs.set_table_styles([cell_hover, headers
+        ], overwrite=False)       
         
         return top_recs
     
+    @output
+    @render.text
+    def headline():
+        return f'Your top 10 recommendations for "{input.song_recommender()}" are:'
+
 www_dir = Path(__file__).parent /"www"
 app = App(app_ui, server,static_assets=www_dir)
