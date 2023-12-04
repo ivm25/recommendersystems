@@ -27,6 +27,5 @@
 
 # Examples of the pages:
 
-
-
+![Recommender System](https://github.com/ivm25/recommendersystems/assets/44321100/c96ab06f-4137-4003-a56c-41581c5d7924)
 
