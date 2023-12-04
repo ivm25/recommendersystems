@@ -29,3 +29,9 @@
 
 ![Recommender System](https://github.com/ivm25/recommendersystems/assets/44321100/c96ab06f-4137-4003-a56c-41581c5d7924)
 
+# Link to the Recommender System app:
+
+
+*Click on the link below to see how the recommender system works*:
+
+https://ishanvm.shinyapps.io/music_5/
