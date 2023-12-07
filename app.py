@@ -47,14 +47,7 @@ grouped_by_mood = mood_classified\
                                             ascending =  False) 
 
 
-# prep_for_modelling(mood_input = None)
 
-# normalise_data(mood_input = None,
-#                    key_col = 'track_name')
-
-
-
-# colours = ['g' if x == 'happy' else 'b' for x in mood_classified['mood'].unique()]
 my_cmap = plt.get_cmap("Dark2")
 colours = [my_cmap(i) for i in range(len(grouped_by_mood['mood'].unique()))]
 
@@ -90,7 +83,11 @@ app_ui = ui.page_fluid(ui.page_navbar(
                                                                 selected='pop',
                                                                 # multiple=False
                                   
-                                                          ), width = 2),
+                                                          ), ui.p("""Each Genre is a combination of key music features.
+                                                           In this pane, select a Genre to output the most popular songs
+                                                            and artists.
+                                                            
+                                                        """), width = 2),
                                                                 ui.output_plot("plot_2", width = '100%'),
                                                                 width = 2
                                                           )),
@@ -102,12 +99,22 @@ app_ui = ui.page_fluid(ui.page_navbar(
                                                                 selected='happy',
                                                                 # multiple=False
                                   
-                                                          ), width = 2),
+                                                          ), ui.p("""Each Mood is an putput of key music audio features.
+                                                           In this pane, select a Mood to output the most popular songs
+                                                            and artists as a function of the mood.
+                                                            
+                                                        """), width = 2),
                                                                 ui.output_plot("plot_3", width = '100%'),
                                                                 width = 2
                                                           )),
                                                            ui.nav("Recommender System",
                                                                 ui.layout_sidebar(ui.panel_sidebar(
+                                                          ui.p("""In this pane, select a Mood to limit the songs data matching
+                                                            that mood. After that, select a song from the dropdown to
+                                                            get an output of similar songs, within that mood categorisation.
+                                                            
+                                                            
+                                                        """),
                                                                 ui.input_radio_buttons(
                                                                 "mood_selector", 
                                                                 "Select a mood",
