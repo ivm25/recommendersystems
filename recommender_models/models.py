@@ -26,14 +26,17 @@ mood_classified['mood'] = mood_classified.apply(mood_classification,
                                                  axis = 1)
 
 
-def prep_for_modelling():
+def prep_for_modelling(mood_input = None):
 
     """_summary_
 
     Returns:
         _type_: _description_
     """
-    key_columns = mood_classified[[
+    data_to_model = mood_classified.copy()
+    data_to_model = data_to_model[data_to_model['mood'] == mood_input]
+
+    key_columns = data_to_model[[
                         'danceability',
                         'energy',
                         "valence", 
@@ -59,18 +62,22 @@ def prep_for_modelling():
 
     return dummy_data
 
-# data_for_modelling = prep_for_modelling()
 
 
-def normalise_data(key_col = None):
+
+def normalise_data(mood_input = None,
+                   key_col = None,
+                   ):
     """_summary_
 
     Returns:
         _type_: _description_
     """
-    
-    data_for_modelling = prep_for_modelling()
-    data_for_modelling.index = analysis_data[key_col]
+    data_to_model = mood_classified.copy()
+    data_to_model = data_to_model[data_to_model['mood'] == mood_input]
+
+    data_for_modelling = prep_for_modelling(mood_input)
+    data_for_modelling.index = data_to_model[key_col]
     # normalized  data by columns
     normalised_data = pd.DataFrame(normalize(data_for_modelling, axis=1))
     normalised_data.columns = data_for_modelling.columns
@@ -82,7 +89,9 @@ def normalise_data(key_col = None):
 
 
 def recs(recommendations_for = None,
+        mood_input = None,
         join_col = 'track_name',
+        
         ):
     """_summary_
 
@@ -93,7 +102,7 @@ def recs(recommendations_for = None,
         _type_: _description_
     """
 
-    df_normalised = normalise_data(key_col = 'track_name')
+    df_normalised = normalise_data(mood_input, key_col = 'track_name')
     all_songs = pd.DataFrame(df_normalised.index)
 
     recommendation_matrix = all_songs.copy()    
@@ -106,7 +115,7 @@ def recs(recommendations_for = None,
     # print(recommendation_matrix)                                    
     # join with the rest of columns
     recommendations = recommendation_matrix.merge(mood_classified,
-                                                    how = 'left',
+                                                    how = 'inner',
                                                     left_on = join_col,
                                                     right_on = join_col
                                                     )
