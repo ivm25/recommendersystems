@@ -47,9 +47,10 @@ grouped_by_mood = mood_classified\
                                             ascending =  False) 
 
 
-prep_for_modelling()
+# prep_for_modelling(mood_input = None)
 
-normalise_data(key_col = 'track_name')
+# normalise_data(mood_input = None,
+#                    key_col = 'track_name')
 
 
 
@@ -106,15 +107,16 @@ app_ui = ui.page_fluid(ui.page_navbar(
                                                                 width = 2
                                                           )),
                                                            ui.nav("Recommender System",
-                                                         ui.layout_sidebar(ui.panel_sidebar(ui.input_select(
-                                                                "song_recommender", 
-                                                                "Recommend Songs for",
-                                                                grouped_by_mood['track_name'].iloc[0:300].unique().tolist(),
-                                                                selected = 'Die For You',
+                                                                ui.layout_sidebar(ui.panel_sidebar(
+                                                                ui.input_radio_buttons(
+                                                                "mood_selector", 
+                                                                "Select a mood",
+                                                                grouped_by_mood['mood'].unique().tolist(),
+                                                                selected = 'happy',
                                                                 # placeholder = "Type a Song",
                                                                 
                                   
-                                                          ), width = 2),
+                                                          ), ui.output_ui("ui_select"),width = 2),
                                                                 ui.row(ui.output_text("headline"),
                                                                        ui.output_table("recommendations", width = '100%'),
                                                                        ),
@@ -169,13 +171,7 @@ def server(input, output, session:Session):
         axs[1].set_ylabel("Artists", fontsize = 12)
         
         
-        # axs[1].legend(grouped_by_mood['mood'].unique(),
-        #               loc = 'best',
-        #               handlelength=4,
-        #               borderpad=2,
-        #               fontsize = 8,
-        #            prop = {'size':10})
-    
+      
     
     @output
     @render.plot
@@ -290,11 +286,28 @@ def server(input, output, session:Session):
         axs[1].title.set_text("Most Popular Artists")
         axs[1].set_xlabel("Popularity", fontsize = 12)
         axs[1].set_ylabel("Artists", fontsize = 12)
+
+    @output
+    @render.ui
+    def ui_select():
+
+        data_to_model = mood_classified.copy()
+        data_to_model = data_to_model[data_to_model['mood'] == input.mood_selector()]
+        track_list = data_to_model['track_name']
+        track_list = track_list.iloc[0:2000]
+        track_list = track_list.tolist()
+        return ui.input_select('key_tracks',
+                                  "select you song",
+                                  track_list,
+                                  selected = "Lovers Rock"
+                                  )
+
         
     @output
     @render.table
     def recommendations():
-        top_recs = recs(recommendations_for=input.song_recommender())
+        top_recs = recs(recommendations_for = input.key_tracks(),
+                        mood_input = input.mood_selector())
       
         
         top_recs = top_recs.style\
@@ -324,7 +337,10 @@ def server(input, output, session:Session):
     @output
     @render.text
     def headline():
-        return f'Your top 10 recommendations for "{input.song_recommender()}" are:'
+        return f'Your top 10 recommendations for "{input.key_tracks()}" are:'
+    
+  
+
 
 www_dir = Path(__file__).parent /"www"
 app = App(app_ui, server,static_assets=www_dir)
