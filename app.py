@@ -3,6 +3,7 @@ from matplotlib import pyplot as plt
 import shinyswatch
 from data_wrangling.data_wrangling import collect_data, mood_classification, correlation, data_manipulation
 from recommender_models.models import prep_for_modelling, normalise_data, recs
+from clustering.clustering_models import get_numerical_data,cluster_ready_data,run_kmeans
 import seaborn as sns
 from pathlib import Path
 import plotly.express as px
@@ -10,7 +11,7 @@ import numpy as np
 
 
 # style
-plt.style.use('dark_background')
+plt.style.use('ggplot')
 page_dependencies = ui.tags.head(
     ui.tags.link(rel="stylesheet", type="text/css", href="style.css")
 )
@@ -51,7 +52,10 @@ grouped_by_mood = mood_classified\
 my_cmap = plt.get_cmap("Dark2")
 colours = [my_cmap(i) for i in range(len(grouped_by_mood['mood'].unique()))]
 
+k_clusters = run_kmeans()
 
+
+# App-------------------------------------------------------------------
 app_ui = ui.page_fluid(ui.page_navbar(
                        shinyswatch.theme.darkly(),
                        ui.nav(" ",
@@ -128,6 +132,28 @@ app_ui = ui.page_fluid(ui.page_navbar(
                                                                        ui.output_table("recommendations", width = '100%'),
                                                                        ),
                                                                 width = 2
+                                                          )),
+                                                          ui.nav("clusters",
+                                                                ui.layout_sidebar(ui.panel_sidebar(
+                                                          ui.p("""In this pane, select a Mood to limit the songs data matching
+                                                            that mood. After that, select a song from the dropdown to
+                                                            get an output of similar songs, within that mood categorisation.
+                                                            
+                                                            
+                                                        """),
+                                                                ui.input_radio_buttons(
+                                                                "mood_selector", 
+                                                                "Select a mood",
+                                                                grouped_by_mood['mood'].unique().tolist(),
+                                                                selected = 'happy',
+                                                                # placeholder = "Type a Song",
+                                                                
+                                  
+                                                          ),width = 2),
+                                                                ui.row(ui.output_plot("cls", width = '100%')
+                                                                       
+                                                                       ),
+                                                                width = 2
                                                           ))
                                         
                                         
@@ -140,7 +166,7 @@ app_ui = ui.page_fluid(ui.page_navbar(
                        title=ui.tags.div(
                            ui.img(src = "ishan_logo.jpg",height="50px", style="margin:5px;" ),
                            ui.h1( "Music Analysis")
-                       ),bg="#0B9C31",
+                       ),bg="#0b9c31",
                        header = page_dependencies
                        
     
@@ -346,8 +372,50 @@ def server(input, output, session:Session):
     def headline():
         return f'Your top 10 recommendations for "{input.key_tracks()}" are:'
     
-  
+    
+    @output
+    @render.plot
+    def cls():
 
+        fig, ax = plt.subplots(2,2,
+                               sharex = True,
+                               sharey = True)
+        
+    
+
+        ax[0,0].scatter(k_clusters['energy'][k_clusters['mood'] == 'energetic'],
+                     k_clusters['popularity'][k_clusters['mood'] == 'energetic'],
+                     
+                     c = k_clusters['labels'][k_clusters['mood'] == 'energetic'],
+                     label = k_clusters['labels'][k_clusters['mood'] == 'energetic']) 
+        ax[0,0].title.set_text('energetic songs')
+      
+        
+        ax[0,1].scatter(k_clusters['energy'][k_clusters['mood'] == 'happy'],
+                     k_clusters['popularity'][k_clusters['mood'] == 'happy'],
+                     
+                     c = k_clusters['labels'][k_clusters['mood'] == 'happy'],
+                     label = k_clusters['labels'][k_clusters['mood'] == 'happy']) 
+        ax[0,1].title.set_text('happy songs')
+        
+
+        ax[1,0].scatter(k_clusters['energy'][k_clusters['mood'] == 'sad'],
+                     k_clusters['popularity'][k_clusters['mood'] == 'sad'],
+                     
+                     c = k_clusters['labels'][k_clusters['mood'] == 'sad'],
+                     label = k_clusters['labels'][k_clusters['mood'] == 'sad']) 
+        ax[1,0].title.set_text('sad songs')
+
+        ax[1,1].scatter(k_clusters['energy'][k_clusters['mood'] == 'calm'],
+                     k_clusters['popularity'][k_clusters['mood'] == 'calm'],
+                     
+                     c = k_clusters['labels'][k_clusters['mood'] == 'calm'],
+                     label = k_clusters['labels'][k_clusters['mood'] == 'calm']) 
+        ax[1,1].title.set_text('calm songs')
+        
+        fig.supxlabel('energy')
+        fig.supylabel('popularity')
+       
 
 www_dir = Path(__file__).parent /"www"
 app = App(app_ui, server,static_assets=www_dir)
