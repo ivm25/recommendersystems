@@ -49,37 +49,26 @@ grouped_by_mood = mood_classified\
 
 
 
-my_cmap = plt.get_cmap("Dark2")
+my_cmap = plt.get_cmap("tab20b")
 colours = [my_cmap(i) for i in range(len(grouped_by_mood['mood'].unique()))]
 
 k_clusters = run_kmeans()
 
+key_cols = ['energy', 
+            'danceability',
+            'liveness',
+            'instrumentalness',
+            'duration_ms',
+            'valence',
+            'speechiness']
 
 # App-------------------------------------------------------------------
 app_ui = ui.page_fluid(ui.page_navbar(
-                       shinyswatch.theme.darkly(),
+                       shinyswatch.theme.zephyr(),
                        ui.nav(" ",
                                    ui.panel_main(
                                       ui.navset_card_tab(
-                                          ui.nav("Key Music Features", 
-                                                ui.layout_sidebar(ui.panel_sidebar(ui.input_select(
-                                                                "Genre_Selection", 
-                                                                "Select a Genre",
-                                                                analysis_data['track_genre'].unique().tolist(),
-                                                                selected='pop',
-                                                               
-                                                                # multiple=False
-                                                ), ui.p("""Each Genre is a combination of key music features.
-                                                           In this pane, select a Genre to study its key features.
-                                                           The white vertical bars on each of the charts
-                                                           signify the overall mean of that music feature.
-                                                            
-                                                        """)
-                                                 ,width = 2, )
-                                                ,
-                                                ui.output_plot("plot_1",width='100%'),
-                                               
-                                                 )),ui.nav("Top songs and artists by Genre",
+                                      ui.nav("Top songs and artists by Genre",
                                                          ui.layout_sidebar(ui.panel_sidebar(ui.input_select(
                                                                 "Genre_Selection_2", 
                                                                 "Select a Genre",
@@ -103,7 +92,7 @@ app_ui = ui.page_fluid(ui.page_navbar(
                                                                 selected='happy',
                                                                 # multiple=False
                                   
-                                                          ), ui.p("""Each Mood is an putput of key music audio features.
+                                                          ), ui.p("""Each Mood is an input of key music audio features.
                                                            In this pane, select a Mood to output the most popular songs
                                                             and artists as a function of the mood.
                                                             
@@ -113,9 +102,7 @@ app_ui = ui.page_fluid(ui.page_navbar(
                                                           )),
                                                            ui.nav("Recommender System",
                                                                 ui.layout_sidebar(ui.panel_sidebar(
-                                                          ui.p("""In this pane, select a Mood to limit the songs data matching
-                                                            that mood. After that, select a song from the dropdown to
-                                                            get an output of similar songs, within that mood categorisation.
+                                                          ui.p("""Select a mood and a song for similar recommendations
                                                             
                                                             
                                                         """),
@@ -133,7 +120,7 @@ app_ui = ui.page_fluid(ui.page_navbar(
                                                                        ),
                                                                 width = 2
                                                           )),
-                                                          ui.nav("clusters",
+                                                          ui.nav("cluster analysis",
                                                                 ui.layout_sidebar(ui.panel_sidebar(
                                                           ui.p("""In this pane, select a Mood to limit the songs data matching
                                                             that mood. After that, select a song from the dropdown to
@@ -142,10 +129,10 @@ app_ui = ui.page_fluid(ui.page_navbar(
                                                             
                                                         """),
                                                                 ui.input_radio_buttons(
-                                                                "mood_selector", 
-                                                                "Select a mood",
-                                                                grouped_by_mood['mood'].unique().tolist(),
-                                                                selected = 'happy',
+                                                                "feature_selector", 
+                                                                "Select a music feature",
+                                                                key_cols,
+                                                                selected = 'energy',
                                                                 # placeholder = "Type a Song",
                                                                 
                                   
@@ -154,7 +141,26 @@ app_ui = ui.page_fluid(ui.page_navbar(
                                                                        
                                                                        ),
                                                                 width = 2
-                                                          ))
+                                                          )),
+                                                           ui.nav("Key Music Features", 
+                                                ui.layout_sidebar(ui.panel_sidebar(ui.input_select(
+                                                                "Genre_Selection", 
+                                                                "Select a Genre",
+                                                                analysis_data['track_genre'].unique().tolist(),
+                                                                selected='pop',
+                                                               
+                                                                # multiple=False
+                                                ), ui.p("""Each Genre is a combination of key music features.
+                                                           In this pane, select a Genre to study its key features.
+                                                           The vertical bars on each of the charts
+                                                           signify the overall mean of that music feature.
+                                                            
+                                                        """)
+                                                 ,width = 2, )
+                                                ,
+                                                ui.output_plot("plot_1",width='100%'),
+                                               
+                                                 ))
                                         
                                         
                                       ),
@@ -166,7 +172,7 @@ app_ui = ui.page_fluid(ui.page_navbar(
                        title=ui.tags.div(
                            ui.img(src = "ishan_logo.jpg",height="50px", style="margin:5px;" ),
                            ui.h1( "Music Analysis")
-                       ),bg="#0b9c31",
+                       ),bg="#E3EBF4",
                        header = page_dependencies
                        
     
@@ -213,39 +219,39 @@ def server(input, output, session:Session):
         axs[0,0].hist(analysis_data['danceability'][analysis_data['track_genre'] == input.Genre_Selection()],
                     
                       ec = 'black',
-                      color = 'green',
-                      alpha = 0.8)
+                      color = '#E3EBF4',
+                      )
         axs[0,1].hist(analysis_data['energy'][analysis_data['track_genre'] == input.Genre_Selection()],
                       ec = 'black',
-                      color = 'green',
-                      alpha = 0.8)
+                      color = '#E3EBF4',
+                      )
         axs[0,2].hist(analysis_data['valence'][analysis_data['track_genre'] == input.Genre_Selection()],
                       ec = 'black',
-                      color = 'green',
-                      alpha = 0.8)
+                      color = '#E3EBF4',
+                      )
         axs[0,3].hist(analysis_data['acousticness'][analysis_data['track_genre'] == input.Genre_Selection()],
                       ec = 'black',
-                      color = 'green',
-                      alpha = 0.8)
+                      color = '#E3EBF4',
+                      )
         axs[1,0].hist(analysis_data['liveness'][analysis_data['track_genre'] == input.Genre_Selection()],
                       ec = 'black',
-                      color = 'green',
-                      alpha = 0.8)
+                      color = '#E3EBF4',
+                      )
         axs[1,1].hist(analysis_data['instrumentalness'][analysis_data['track_genre'] == input.Genre_Selection()],
                       ec = 'black',
                       
-                      color = 'green',
-                      alpha = 0.8)
+                      color = '#E3EBF4',
+                      )
         axs[1,2].hist(analysis_data['loudness'][analysis_data['track_genre'] == input.Genre_Selection()],
                      
-                      color = 'green',
+                      color = '#E3EBF4',
                       ec = 'black',
-                      alpha = 0.8)
+                      )
         axs[1,3].hist(analysis_data['speechiness'][analysis_data['track_genre'] == input.Genre_Selection()],
                     
-                      color = 'green',
+                      color = '#E3EBF4',
                       ec = 'black',
-                      alpha  = 0.8)
+                      )
         
         axs[0,0].set_xlabel('danceability', fontsize = 10)
         axs[0,0].axvline(x = analysis_data['danceability'].mean(),
@@ -345,21 +351,22 @@ def server(input, output, session:Session):
         
         top_recs = top_recs.style\
                    .set_properties(**{                                                  
-                                    'background-color': 'black',                       
+                                    # 'background-color': 'grey',                       
                                     'border-color': 'white',
+                                    'color':'black',
                                     'hide-index': True,
-                                    'header-color': 'black'})\
+                                    'header-color': 'grey'})\
                                     .background_gradient(cmap = my_cmap.colors)\
                                     .hide(axis = 'index')
         
         cell_hover = {  # for row hover use <tr> instead of <td>
             'selector': 'td:hover',
-            'props': [('background-color', '#0B9C31')]
+            'props': [('background-color', '#E3EBF4')]
         }
         
         headers = {
             'selector': 'th:not(.index_name)',
-            'props': 'background-color: #000000; font-weight:normal;color: white;'
+            'props': 'background-color: #E3EBF4; font-weight:bold;color: black;'
         }
 
         top_recs.set_table_styles([cell_hover, headers
@@ -383,7 +390,7 @@ def server(input, output, session:Session):
         
     
 
-        ax[0,0].scatter(k_clusters['energy'][k_clusters['mood'] == 'energetic'],
+        ax[0,0].scatter(k_clusters[input.feature_selector()][k_clusters['mood'] == 'energetic'],
                      k_clusters['popularity'][k_clusters['mood'] == 'energetic'],
                      
                      c = k_clusters['labels'][k_clusters['mood'] == 'energetic'],
@@ -391,7 +398,7 @@ def server(input, output, session:Session):
         ax[0,0].title.set_text('energetic songs')
       
         
-        ax[0,1].scatter(k_clusters['energy'][k_clusters['mood'] == 'happy'],
+        ax[0,1].scatter(k_clusters[input.feature_selector()][k_clusters['mood'] == 'happy'],
                      k_clusters['popularity'][k_clusters['mood'] == 'happy'],
                      
                      c = k_clusters['labels'][k_clusters['mood'] == 'happy'],
@@ -399,22 +406,24 @@ def server(input, output, session:Session):
         ax[0,1].title.set_text('happy songs')
         
 
-        ax[1,0].scatter(k_clusters['energy'][k_clusters['mood'] == 'sad'],
+        ax[1,0].scatter(k_clusters[input.feature_selector()][k_clusters['mood'] == 'sad'],
                      k_clusters['popularity'][k_clusters['mood'] == 'sad'],
                      
                      c = k_clusters['labels'][k_clusters['mood'] == 'sad'],
                      label = k_clusters['labels'][k_clusters['mood'] == 'sad']) 
         ax[1,0].title.set_text('sad songs')
 
-        ax[1,1].scatter(k_clusters['energy'][k_clusters['mood'] == 'calm'],
+        ax[1,1].scatter(k_clusters[input.feature_selector()][k_clusters['mood'] == 'calm'],
                      k_clusters['popularity'][k_clusters['mood'] == 'calm'],
                      
                      c = k_clusters['labels'][k_clusters['mood'] == 'calm'],
                      label = k_clusters['labels'][k_clusters['mood'] == 'calm']) 
         ax[1,1].title.set_text('calm songs')
         
-        fig.supxlabel('energy')
+        fig.supxlabel(input.feature_selector())
         fig.supylabel('popularity')
+        fig.suptitle('k-means clustering showing popularity as a function of key music features')
+        plt.legend(labels = k_clusters['labels'].unique())
        
 
 www_dir = Path(__file__).parent /"www"
