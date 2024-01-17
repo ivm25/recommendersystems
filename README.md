@@ -27,7 +27,8 @@
 
 # Examples of the pages:
 
-![Recommender System](https://github.com/ivm25/recommendersystems/assets/44321100/c96ab06f-4137-4003-a56c-41581c5d7924)
+
+![Music Analysis python shiny](https://github.com/ivm25/recommendersystems/assets/44321100/f956b857-c70d-445f-8c00-a6f92c41c9c6)
 
 # Link to the Recommender System app:
 
