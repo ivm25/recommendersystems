@@ -21,6 +21,8 @@ import seaborn as sns
 
 # fetch data
 
+plt.style.use('ggplot')
+
 analysis_data = data_manipulation()
 
 mood_classified = analysis_data.copy()
@@ -47,7 +49,7 @@ def get_numerical_data():
                         "acousticness",
                         "liveness",
                         "track_genre",
-                        # "loudness",
+                        "loudness",
                         "speechiness",
                         # 'tempo',
                         'duration_ms',
@@ -103,22 +105,22 @@ def run_kmeans():
     return labelled_data
 
 
-test = run_kmeans()
+# test = run_kmeans()
 
 # fig = plt.figure()
 # ax = fig.add_subplot(projection='3d')
 
 
 
-# ax.scatter(mood_classified['energy'],
-#              mood_classified['danceability'],
-#              mood_classified['popularity'],
+# ax.scatter(mood_classified['liveness'],
+#              mood_classified['speechiness'],
+#              mood_classified['loudness'],
 #              c = mood_classified['labels'],
 #              label = mood_classified['mood']) 
 
-# ax.set_xlabel('acousticness')
-# ax.set_ylabel('instrumentalness')
-# ax.set_zlabel('popularity')
+# ax.set_xlabel('energy')
+# ax.set_ylabel('danceability')
+# ax.set_zlabel('loudness')
 # plt.show()
 
 #
@@ -134,30 +136,37 @@ test = run_kmeans()
 # plt.show()
 
  # A list holds the SSE values for each k
-# sse = []
-# for k in range(1, 20):
-#     kmeans = KMeans(n_clusters=k, init="k-means++",
-#                     random_state=15)
-#     kmeans.fit(cluster_ready_data(clustered_data))
-#     sse.append(kmeans.inertia_)
+
+def kmeans_sse():
+    sse = []
+    for k in range(1, 20):
+        kmeans = KMeans(n_clusters=k, init="k-means++",
+                        random_state=15)
+        kmeans.fit(cluster_ready_data(key_col = 'track_name'))
+        sse.append(kmeans.inertia_)
+    return sse
 
 
-# plt.style.use("fivethirtyeight")
+# plt.style.use("ggplot")
 # plt.plot(range(1, 20), sse)
 # plt.xticks(range(1, 20))
 # plt.xlabel("Number of Clusters")
 # plt.ylabel("SSE")
 # plt.show()
 
-# #------------
-# silhouette_coefficients = []
-#    # Notice you start at 2 clusters for silhouette coefficient
-# for k in range(2, 11):
-#     kmeans = KMeans(n_clusters=k, init="k-means++",
-#                     random_state=15)
-#     kmeans.fit(cluster_ready_data(clustered_data))
-#     score = silhouette_score(cluster_ready_data(clustered_data), kmeans.labels_)
-#     silhouette_coefficients.append(score)
+#------------
+
+def silhouette_kmeans():
+
+    silhouette_coefficients = []
+    # Notice you start at 2 clusters for silhouette coefficient
+    for k in range(2, 11):
+        kmeans = KMeans(n_clusters=k, init="k-means++",
+                        random_state=15)
+        kmeans.fit(cluster_ready_data(key_col = 'track_name'))
+        score = silhouette_score(cluster_ready_data(key_col = 'track_name'), kmeans.labels_)
+        silhouette_coefficients.append(score)
+    return silhouette_coefficients
 
 
 # plt.plot(range(2, 11), silhouette_coefficients)
