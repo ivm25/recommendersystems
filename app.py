@@ -138,28 +138,30 @@ app_ui = ui.page_fluid(ui.page_navbar(
                                                                        ),
                                                                 width = 2
                                                           )),
-                                                          ui.nav("k-means clustering",
-                                                                ui.layout_sidebar(ui.sidebar(
-                                                          ui.p("""In this pane, select a Mood to limit the songs data matching
-                                                            that mood. After that, select a song from the dropdown to
-                                                            get an output of similar songs, within that mood categorisation.
+                                                        #   ui.nav("Song Segmentation",
+                                                        #         ui.layout_sidebar(ui.sidebar(
+                                                        #   ui.p("""In this pane, select a music feature to show songs' 
+                                                        #        segmentation into new clusters as a function of popularity
+                                                        #        and loudness.
+                                                               
                                                             
                                                             
-                                                        """),
-                                                                ui.input_radio_buttons(
-                                                                "feature_selector", 
-                                                                "Select a music feature",
-                                                                key_cols,
-                                                                selected = 'energy',
-                                                                # placeholder = "Type a Song",
+                                                        # """),
+                                                        #         ui.input_radio_buttons(
+                                                        #         "feature_selector", 
+                                                        #         "Select a music feature",
+                                                        #         key_cols,
+                                                        #         selected = 'energy',
+                                                        #         # placeholder = "Type a Song",
                                                                 
                                   
-                                                          ),open = 'desktop'),
-                                                                ui.row(ui.output_plot("cls", width = '100%')
+                                                        #   ),open = 'desktop'),
+                                                        #         ui.row(ui.output_plot("cls", width = '100%')
                                                                        
-                                                                       ),
-                                                                width = 2
-                                                          )),
+                                                        #                ),
+                                                        #         width = 2
+                                                        #   ))
+                                                        #   ,
                                                            ui.nav("Music Features Distributions", 
                                                              ui.layout_sidebar(ui.sidebar(ui.input_select(
                                                                 "Genre_Selection", 
