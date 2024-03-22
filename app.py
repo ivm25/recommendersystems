@@ -3,7 +3,7 @@ from matplotlib import pyplot as plt
 import shinyswatch
 from data_wrangling.data_wrangling import collect_data, mood_classification, correlation, data_manipulation
 from recommender_models.models import prep_for_modelling, normalise_data, recs
-from clustering.clustering_models import get_numerical_data,cluster_ready_data,run_kmeans
+# from clustering.clustering_models import get_numerical_data,cluster_ready_data,run_kmeans
 import seaborn as sns
 from pathlib import Path
 import plotly.express as px
@@ -55,7 +55,7 @@ my_cmap = plt.get_cmap("tab20b")
 
 colours = [my_cmap(i) for i in range(len(grouped_by_mood['mood'].unique()))]
 
-k_clusters = run_kmeans()
+# k_clusters = run_kmeans()
 
 # k_means_sse = kmeans_sse()
 
@@ -449,30 +449,30 @@ def server(input, output, session:Session):
         return f'Audio features of "{input.Genre_Selection()}" genre are shown below:'
     
     
-    @output
-    @render.plot
-    def cls():
+    # @output
+    # @render.plot
+    # def cls():
 
-        fig = plt.figure(figsize=(36,36))
-        ax = fig.add_subplot(projection='3d')
+    #     fig = plt.figure(figsize=(36,36))
+    #     ax = fig.add_subplot(projection='3d')
 
-        ax.scatter(k_clusters[input.feature_selector()],
-                    k_clusters['popularity'],
-                    k_clusters['loudness'],
-                    # c = k_clusters['labels'],
-                    cmap = "PRGn",
-                    c = k_clusters['labels'],
-                  ) 
+    #     ax.scatter(k_clusters[input.feature_selector()],
+    #                 k_clusters['popularity'],
+    #                 k_clusters['loudness'],
+    #                 # c = k_clusters['labels'],
+    #                 cmap = "PRGn",
+    #                 c = k_clusters['labels'],
+    #               ) 
         
         
-        ax.set_xlabel(input.feature_selector(),
-                      fontsize = 8)
-        ax.set_ylabel('popularity', fontsize = 8)
-        ax.set_zlabel('loudness', fontsize = 8)
-        ax.tick_params(which='major', width=0.75, length=2.5, labelsize=8)
-        # plt.legend(labels = label)
-        fig.suptitle('k-means clustering',
-                     fontsize = 8)
+        # ax.set_xlabel(input.feature_selector(),
+        #               fontsize = 8)
+        # ax.set_ylabel('popularity', fontsize = 8)
+        # ax.set_zlabel('loudness', fontsize = 8)
+        # ax.tick_params(which='major', width=0.75, length=2.5, labelsize=8)
+        # # plt.legend(labels = label)
+        # fig.suptitle('k-means clustering',
+        #              fontsize = 8)
 
 www_dir = Path(__file__).parent /"www"
 app = App(app_ui, server,static_assets=www_dir)
