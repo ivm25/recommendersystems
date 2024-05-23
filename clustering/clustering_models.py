@@ -105,7 +105,7 @@ def run_kmeans():
     return labelled_data
 
 
-# test = run_kmeans()
+test = run_kmeans()
 
 # fig = plt.figure()
 # ax = fig.add_subplot(projection='3d')
@@ -126,11 +126,11 @@ def run_kmeans():
 #
 # plt.style.use('ggplot')
 # sns.catplot(
-#     data=mood_classified, 
-#     x="energy",
+#     data=test, 
+#     x="loudness",
 #     y="popularity", hue="labels",
 #     native_scale=True, zorder=1,
-#     col = 'mood'
+#     # col = 'mood'
 # )
 
 # plt.show()

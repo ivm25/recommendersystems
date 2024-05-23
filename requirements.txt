@@ -90,3 +90,8 @@ rsconnect-python
 shinyswatch
 
 scikit-learn
+openai
+tabulate
+langchain
+langchain-experimental
+langchain_openai

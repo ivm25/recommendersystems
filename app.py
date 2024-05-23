@@ -1,5 +1,6 @@
 from shiny import App, render, ui, reactive, Session
 from matplotlib import pyplot as plt
+import pandas as pd
 import shinyswatch
 from data_wrangling.data_wrangling import collect_data, mood_classification, correlation, data_manipulation
 from recommender_models.models import prep_for_modelling, normalise_data, recs
@@ -8,6 +9,12 @@ import seaborn as sns
 from pathlib import Path
 import plotly.express as px
 import numpy as np
+from langchain.agents.agent_types import AgentType
+from langchain_experimental.agents.agent_toolkits import create_csv_agent, create_pandas_dataframe_agent
+from langchain_openai import ChatOpenAI, OpenAI
+import tabulate
+import os
+
 
 
 # style
@@ -47,11 +54,24 @@ grouped_by_mood = mood_classified\
                                 .sort_values(by='popularity', 
                                             ascending =  False) 
 
+agent =  create_pandas_dataframe_agent(
+    OpenAI(temperature=0,
+           api_key= os.getenv("OPENAI_API_KEY")),
+    grouped_by_mood,
+    verbose=True,
+    agent_type=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+)
 
 
 my_cmap = plt.get_cmap("tab20b")
 
+list_of_questions_mood = ['Top 10 songs where mood is happy',
+                     'Top 10 songs where mood is sad',
+                     'Top 10 songs where mood is energetic']
 
+list_of_questions_genre = ['Top 10 songs where genre is pop',
+                     'Top 10 songs where genre is rock',
+                     'Top 10 songs where mood is hip-hop']
 
 colours = [my_cmap(i) for i in range(len(grouped_by_mood['mood'].unique()))]
 
@@ -91,9 +111,16 @@ app_ui = ui.page_fluid(ui.page_navbar(
                                                             
                                                         """), open = "desktop"),
                                                                 ui.row(ui.output_text("songs_headline"),
-                                                                       ui.output_plot("plot_2", width = '100%',
-                                                                                           
-                                                                                hover = True)),
+                                                                       ui.output_plot("plot_2", width = '100%',             
+                                                                                      hover = True),
+                                                                        ui.input_text_area("text_input_2",
+                                                                                           "Ask me about songs based on Genre",
+                                                                                            # list_of_questions_genre,
+                                                                                             width = "100%"),
+                                                                        ui.output_text_verbatim("questions_2",
+                                                                                                
+                                                                                                    )
+                                                                    ),
                                                                                       
                                                                 width = 2,
                                                                 
@@ -112,7 +139,13 @@ app_ui = ui.page_fluid(ui.page_navbar(
                                                             
                                                         """),open = 'desktop'),
                                                                 ui.row(ui.output_text("songs_headline_mood"),
-                                                                       ui.output_plot("plot_3", width = '100%')),
+                                                                       ui.output_plot("plot_3", width = '100%'),
+                                                                        ui.input_text_area("text_input",
+                                                                                           "Ask me about songs based on mood",
+                                                                                            # list_of_questions_mood,
+                                                                                             width = "100%"),
+                                                                                ui.output_text_verbatim("questions"
+                                                                                                    )),
                                                                 width = 2
                                                           )),
                                                            ui.nav("Content based Music Recommender System",
@@ -135,33 +168,15 @@ app_ui = ui.page_fluid(ui.page_navbar(
                                                                 ui.row(ui.output_text("headline"),
                                                                        ui.output_table("recommendations", width = '100%', 
                                                                                       ),
+                                                                        
+                                                                            # ui.input_text_area("text_input","Ask me about songs"),
+                                                                            # ui.output_text_verbatim("questions",
+                                                                            #                         placeholder=False)
                                                                        ),
                                                                 width = 2
                                                           )),
-                                                        #   ui.nav("Song Segmentation",
-                                                        #         ui.layout_sidebar(ui.sidebar(
-                                                        #   ui.p("""In this pane, select a music feature to show songs' 
-                                                        #        segmentation into new clusters as a function of popularity
-                                                        #        and loudness.
-                                                               
-                                                            
-                                                            
-                                                        # """),
-                                                        #         ui.input_radio_buttons(
-                                                        #         "feature_selector", 
-                                                        #         "Select a music feature",
-                                                        #         key_cols,
-                                                        #         selected = 'energy',
-                                                        #         # placeholder = "Type a Song",
-                                                                
-                                  
-                                                        #   ),open = 'desktop'),
-                                                        #         ui.row(ui.output_plot("cls", width = '100%')
-                                                                       
-                                                        #                ),
-                                                        #         width = 2
-                                                        #   ))
-                                                        #   ,
+                                                       
+                                                    
                                                            ui.nav("Music Features Distributions", 
                                                              ui.layout_sidebar(ui.sidebar(ui.input_select(
                                                                 "Genre_Selection", 
@@ -208,8 +223,12 @@ def server(input, output, session:Session):
     def plot_2():
     
         fig, axs = plt.subplots( figsize = (72,72), sharex = True)
-        axs.barh(y = grouped_by_mood['track_name'][grouped_by_mood['track_genre'] == input.Genre_Selection_2()].iloc[0:10],
-                 width = sorted(grouped_by_mood['popularity'].iloc[0:10]),
+        axs.barh(y = grouped_by_mood[grouped_by_mood['track_genre'] == input.Genre_Selection_2()]\
+                                .sort_values(by='popularity', ascending=False)\
+                                    .head(10)['track_name'],
+                 width = grouped_by_mood[grouped_by_mood['track_genre'] == input.Genre_Selection_2()]\
+                               .sort_values(by='popularity', ascending=False)\
+                                    .head(10)['popularity'],
                  color = my_cmap.colors,
                  alpha = 0.7
                  )
@@ -264,7 +283,7 @@ def server(input, output, session:Session):
                       ec = 'black',
                       )
         
-        axs[0,0].set_xlabel('danceability', fontsize = 8, rotation = 45)
+        axs[0,0].set_xlabel('danceability', fontsize = 8)
         axs[0,0].axvline(x = analysis_data['danceability'].mean(),
                          linestyle = '--',
                          )
@@ -274,7 +293,7 @@ def server(input, output, session:Session):
                             labelsize=7,
                             rotation = 90)
 
-        axs[0,1].set_xlabel('energy',fontsize = 8, rotation = 45)
+        axs[0,1].set_xlabel('energy',fontsize = 8)
         axs[0,1].axvline(x = analysis_data['energy'].mean(), 
                          linestyle = '--',
                          )
@@ -284,7 +303,7 @@ def server(input, output, session:Session):
                             labelsize=7,
                             rotation = 90)
 
-        axs[0,2].set_xlabel('valence',fontsize = 8, rotation = 45)
+        axs[0,2].set_xlabel('valence',fontsize = 8)
         axs[0,2].axvline(x = analysis_data['valence'].mean(), 
                          linestyle = '--',
                          )
@@ -294,7 +313,7 @@ def server(input, output, session:Session):
                             labelsize=7,
                             rotation = 90)
 
-        axs[0,3].set_xlabel('acousticness',fontsize = 8, rotation = 45)
+        axs[0,3].set_xlabel('acousticness',fontsize = 8)
         axs[0,3].axvline(x = analysis_data['acousticness'].mean(), 
                          linestyle = '--',
                          )
@@ -304,13 +323,13 @@ def server(input, output, session:Session):
                             labelsize=7,
                             rotation = 90)
 
-        axs[1,0].set_xlabel('liveness',fontsize = 8, rotation = 45)
+        axs[1,0].set_xlabel('liveness',fontsize = 8)
         axs[1,0].axvline(x = analysis_data['liveness'].mean(), 
                          linestyle = '--',
                          )
         axs[1,0].tick_params(which='major', width=0.75, length=2.5, labelsize=8)
 
-        axs[1,1].set_xlabel('instrumentalness',fontsize = 8,rotation = 45)
+        axs[1,1].set_xlabel('instrumentalness',fontsize = 8)
         axs[1,1].axvline(x = analysis_data['instrumentalness'].mean(), 
                          linestyle = '--',
                          )
@@ -319,7 +338,7 @@ def server(input, output, session:Session):
                              labelsize=7,
                              rotation = 90)
 
-        axs[1,2].set_xlabel('loudness',fontsize = 8, rotation = 45)
+        axs[1,2].set_xlabel('loudness',fontsize = 8)
         axs[1,2].axvline(x = analysis_data['loudness'].mean(), 
                          linestyle = '--',
                          )
@@ -328,7 +347,7 @@ def server(input, output, session:Session):
                             labelsize=7,
                             rotation = 90)
 
-        axs[1,3].set_xlabel('speechiness',fontsize = 8, rotation = 45)
+        axs[1,3].set_xlabel('speechiness',fontsize = 8)
         axs[1,3].axvline(x = analysis_data['speechiness'].mean(), 
                          linestyle = '--',
                          )
@@ -348,8 +367,12 @@ def server(input, output, session:Session):
     def plot_3():
     
         fig, axs = plt.subplots( figsize = (72,72), sharex = True)
-        axs.barh(y = grouped_by_mood['track_name'][grouped_by_mood['mood'] == input.Mood_Selection()].iloc[0:10],
-                 width = sorted(grouped_by_mood['popularity'].iloc[0:10]),
+        axs.barh(y = grouped_by_mood[grouped_by_mood['mood'] == input.Mood_Selection()]\
+                             .sort_values(by='popularity', ascending=False)\
+                                .head(10)['track_name'],
+                 width = grouped_by_mood[grouped_by_mood['mood'] == input.Mood_Selection()]\
+                             .sort_values(by='popularity', ascending=False)\
+                                .head(10)['popularity'],
                  color = my_cmap.colors,
                  alpha = 0.7
                  )
@@ -449,30 +472,15 @@ def server(input, output, session:Session):
         return f'Audio features of "{input.Genre_Selection()}" genre are shown below:'
     
     
-    # @output
-    # @render.plot
-    # def cls():
-
-    #     fig = plt.figure(figsize=(36,36))
-    #     ax = fig.add_subplot(projection='3d')
-
-    #     ax.scatter(k_clusters[input.feature_selector()],
-    #                 k_clusters['popularity'],
-    #                 k_clusters['loudness'],
-    #                 # c = k_clusters['labels'],
-    #                 cmap = "PRGn",
-    #                 c = k_clusters['labels'],
-    #               ) 
-        
-        
-        # ax.set_xlabel(input.feature_selector(),
-        #               fontsize = 8)
-        # ax.set_ylabel('popularity', fontsize = 8)
-        # ax.set_zlabel('loudness', fontsize = 8)
-        # ax.tick_params(which='major', width=0.75, length=2.5, labelsize=8)
-        # # plt.legend(labels = label)
-        # fig.suptitle('k-means clustering',
-        #              fontsize = 8)
+    @output
+    @render.text
+    def questions():
+        return agent.run(input.text_input())
+    
+    @output
+    @render.text
+    def questions_2():
+        return agent.run(input.text_input_2())
 
 www_dir = Path(__file__).parent /"www"
 app = App(app_ui, server,static_assets=www_dir)

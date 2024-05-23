@@ -124,7 +124,9 @@ def recs(recommendations_for = None,
                                 'artists', 
                                 'track_genre',
                                 'album_name',
-                                'mood']].iloc[1:10]
+                                'mood',
+                            
+                                ]].iloc[1:10]
     # print(top_recs)
     return top_recs
 
