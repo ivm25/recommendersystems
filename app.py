@@ -54,13 +54,6 @@ grouped_by_mood = mood_classified\
                                 .sort_values(by='popularity', 
                                             ascending =  False) 
 
-agent =  create_pandas_dataframe_agent(
-    OpenAI(temperature=0,
-           api_key= os.getenv("OPENAI_API_KEY")),
-    grouped_by_mood,
-    verbose=True,
-    agent_type=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
-)
 
 
 my_cmap = plt.get_cmap("tab20b")
@@ -113,13 +106,13 @@ app_ui = ui.page_fluid(ui.page_navbar(
                                                                 ui.row(ui.output_text("songs_headline"),
                                                                        ui.output_plot("plot_2", width = '100%',             
                                                                                       hover = True),
-                                                                        ui.input_text_area("text_input_2",
-                                                                                           "Ask me about songs based on Genre",
-                                                                                            # list_of_questions_genre,
-                                                                                             width = "100%"),
-                                                                        ui.output_text_verbatim("questions_2",
+                                                                        # ui.input_text_area("text_input_2",
+                                                                        #                    "Ask me about songs based on Genre",
+                                                                        #                     # list_of_questions_genre,
+                                                                        #                      width = "100%"),
+                                                                        # ui.output_text_verbatim("questions_2",
                                                                                                 
-                                                                                                    )
+                                                                        #                             )
                                                                     ),
                                                                                       
                                                                 width = 2,
@@ -140,12 +133,13 @@ app_ui = ui.page_fluid(ui.page_navbar(
                                                         """),open = 'desktop'),
                                                                 ui.row(ui.output_text("songs_headline_mood"),
                                                                        ui.output_plot("plot_3", width = '100%'),
-                                                                        ui.input_text_area("text_input",
-                                                                                           "Ask me about songs based on mood",
-                                                                                            # list_of_questions_mood,
-                                                                                             width = "100%"),
-                                                                                ui.output_text_verbatim("questions"
-                                                                                                    )),
+                                                                        # ui.input_text_area("text_input",
+                                                                        #                    "Ask me about songs based on mood",
+                                                                        #                     # list_of_questions_mood,
+                                                                        #                      width = "100%"),
+                                                                        #         ui.output_text_verbatim("questions"
+                                                                        #                             )
+                                                                                                    ),
                                                                 width = 2
                                                           )),
                                                            ui.nav("Content based Music Recommender System",
@@ -472,15 +466,15 @@ def server(input, output, session:Session):
         return f'Audio features of "{input.Genre_Selection()}" genre are shown below:'
     
     
-    @output
-    @render.text
-    def questions():
-        return agent.run(input.text_input())
+    # @output
+    # @render.text
+    # def questions():
+    #     return agent.run(input.text_input())
     
-    @output
-    @render.text
-    def questions_2():
-        return agent.run(input.text_input_2())
+    # @output
+    # @render.text
+    # def questions_2():
+    #     return agent.run(input.text_input_2())
 
 www_dir = Path(__file__).parent /"www"
 app = App(app_ui, server,static_assets=www_dir)
